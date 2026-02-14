@@ -13,6 +13,7 @@ namespace PatriotPower
     public partial class MainWindow : Window
     {
         private bool _isSafetyCheckComplete = false;
+        private bool _isInitializing = true;
         private bool _isAnimating = false;
         private bool _pendingDeactivation = false;
 
@@ -52,7 +53,6 @@ namespace PatriotPower
             if (!_isSafetyCheckComplete)
             {
                 StatusText.Text = "Analyzing GPU Topology...";
-                EnduranceToggle.IsEnabled = false;
 
                 try
                 {
@@ -64,7 +64,6 @@ namespace PatriotPower
                         bool isEnduranceActive = await GpuManager.IsEnduranceModeActiveAsync();
 
                         // 2. Set the UI to match the hardware BEFORE attaching the events.
-                        // This prevents the WPF toggle event from misfiring and modifying the system on startup.
                         EnduranceToggle.IsChecked = isEnduranceActive;
 
                         // 3. Attach event handlers now that the baseline state is firmly established
@@ -90,7 +89,6 @@ namespace PatriotPower
                     {
                         StatusText.Text = "💔 UNSAFE CONFIGURATION 💔\nOnly 1 GPU detected. Toggling would cause a Black Screen.";
                         StatusText.Foreground = new SolidColorBrush(Color.FromRgb(200, 0, 0)); // Red
-                        EnduranceToggle.IsEnabled = false;
                     }
                 }
                 catch (Exception ex)
@@ -98,6 +96,11 @@ namespace PatriotPower
                     StatusText.Text = "💔 SYSTEM CHECK FAILED 💔";
                     StatusText.Foreground = new SolidColorBrush(Color.FromRgb(200, 0, 0)); // Red
                     MessageBox.Show($"Failed to verify system safety: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    // Release the startup lock so user interactions can now process normally
+                    _isInitializing = false;
                 }
             }
         }
@@ -295,14 +298,17 @@ namespace PatriotPower
 
         private async void EnduranceToggle_Checked(object sender, RoutedEventArgs e)
         {
-            StatusText.Text = "Switching to Endurance Mode...";
+            // Hard block to prevent phantom WPF events from triggering PowerShell during startup
+            if (_isInitializing) return;
+
+            StatusText.Text = "Disabling dGPU to conserve battery...";
             StatusText.Foreground = new SolidColorBrush(Color.FromRgb(0, 100, 0)); // Dark Green
             try
             {
                 await GpuManager.EnableEnduranceModeAsync();
 
                 StatusText.Text = string.Empty; // Clear existing text to use rich Inlines
-                StatusText.Inlines.Add(new Run("Conserving energy, dGPU disabled ") { Foreground = new SolidColorBrush(Color.FromRgb(0, 100, 0)) });
+                StatusText.Inlines.Add(new Run("dGPU disabled, conserving energy ") { Foreground = new SolidColorBrush(Color.FromRgb(0, 100, 0)) });
                 StatusText.Inlines.Add(new Run("♥") { Foreground = new SolidColorBrush(Color.FromRgb(255, 105, 180)) }); // Hot Pink
             }
             catch (Exception ex)
@@ -318,7 +324,10 @@ namespace PatriotPower
 
         private async void EnduranceToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            StatusText.Text = "Waking up High-Performance GPU...";
+            // Hard block to prevent phantom WPF events from triggering PowerShell during startup
+            if (_isInitializing) return;
+
+            StatusText.Text = "Enabling dGPU...";
             StatusText.Foreground = new SolidColorBrush(Color.FromRgb(85, 85, 85)); // Dark Gray
             try
             {
