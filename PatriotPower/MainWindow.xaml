@@ -1,0 +1,223 @@
+﻿<Window x:Class="PatriotPower.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        mc:Ignorable="d"
+        Title="PatriotPower Flyout" 
+        Height="400" Width="300"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Deactivated="Window_Deactivated"
+        Loaded="Window_Loaded">
+
+    <Border CornerRadius="20" Margin="10">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="5" Opacity="0.4" Color="#880000"/>
+        </Border.Effect>
+
+        <Border.Background>
+            <ImageBrush ImageSource="background.png" Stretch="UniformToFill" Opacity="0.95">
+                <ImageBrush.RelativeTransform>
+                    <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="1" ScaleY="1"/>
+                </ImageBrush.RelativeTransform>
+            </ImageBrush>
+        </Border.Background>
+
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FFF0F5" Offset="0.0"/>
+                            <GradientStop Color="#FFC0CB" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Border.Style>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Top" 
+                        Margin="0,15,15,0">
+
+                <ToggleButton x:Name="PinButton"
+                              Click="PinButton_Click"
+                              Background="Transparent" 
+                              BorderThickness="0" 
+                              Foreground="#888" 
+                              FontSize="14" 
+                              Margin="0,0,5,0"
+                              Padding="5"
+                              Cursor="Hand"
+                              ToolTip="Pin Window">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="Content" Value="📍" />
+                            <Setter Property="Opacity" Value="0.6" />
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content" Value="📌" />
+                                    <Setter Property="Opacity" Value="1.0" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Opacity" Value="1.0" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+
+                <Button Content="✕" 
+                        Click="ExitButton_Click" 
+                        Background="Transparent" 
+                        BorderThickness="0" 
+                        Foreground="#888" 
+                        FontSize="16" 
+                        FontWeight="Bold"
+                        Padding="5"
+                        Cursor="Hand"
+                        ToolTip="Exit PatriotPower"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="0" Margin="0,25,0,0" HorizontalAlignment="Center">
+                <TextBlock Text="♥ PatriotPower ♥" 
+                           FontWeight="Bold" 
+                           FontSize="20" 
+                           Foreground="#D10056"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Hardware Kill-Switch" 
+                           FontSize="12" 
+                           Foreground="#555"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+
+                <ui:ToggleSwitch x:Name="EnduranceToggle"
+                                 Content="Endurance Mode: OFF"
+                                 FontSize="16"
+                                 FontWeight="SemiBold"
+                                 Foreground="#8B0000"
+                                 Background="#F0F0F0"
+                                 BorderBrush="#555555"
+                                 BorderThickness="1.5"
+                                 HorizontalAlignment="Center"
+                                 RenderTransformOrigin="0.5,0.5"
+                                 Margin="0,5,0,5">
+                    <ui:ToggleSwitch.RenderTransform>
+                        <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
+                    </ui:ToggleSwitch.RenderTransform>
+                    <ui:ToggleSwitch.Resources>
+                        <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#4CAF50" />
+                        <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#45A049" />
+                        <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#388E3C" />
+
+                        <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="White" />
+                        <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="White" />
+                        <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#E0E0E0" />
+
+                        <SolidColorBrush x:Key="ToggleSwitchStrokeOn" Color="#555555" />
+                        <SolidColorBrush x:Key="ToggleSwitchStrokeOff" Color="#555555" />
+                        <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver" Color="#555555" />
+                        <SolidColorBrush x:Key="ToggleSwitchStrokeOffPointerOver" Color="#555555" />
+                        <SolidColorBrush x:Key="ToggleSwitchStrokeOnPressed" Color="#555555" />
+                        <SolidColorBrush x:Key="ToggleSwitchStrokeOffPressed" Color="#555555" />
+                    </ui:ToggleSwitch.Resources>
+                </ui:ToggleSwitch>
+
+                <TextBlock Text="(Disables dGPU)" 
+                           FontSize="11" 
+                           Foreground="#888" 
+                           Margin="0,5,0,0" 
+                           HorizontalAlignment="Center"/>
+
+                <Border Background="#E5FFFFFF" CornerRadius="10" Margin="30,15,30,0" Padding="15,10">
+                    <StackPanel>
+                        <TextBlock Text="LIVE SYSTEM DRAW" 
+                                   FontSize="10" 
+                                   FontWeight="Bold" 
+                                   Foreground="#777" 
+                                   HorizontalAlignment="Center" 
+                                   Margin="0,0,0,5"/>
+
+                        <TextBlock x:Name="CurrentDrawText" 
+                                   Text="-- W" 
+                                   FontSize="24" 
+                                   FontWeight="Bold" 
+                                   Foreground="#333" 
+                                   HorizontalAlignment="Center"/>
+
+                        <TextBlock x:Name="PeakDrawText" 
+                                   Text="Peak: -- W" 
+                                   FontSize="11" 
+                                   Foreground="#666" 
+                                   HorizontalAlignment="Center"
+                                   Margin="0,2,0,0"/>
+
+                        <TextBlock x:Name="TimeRemainingText" 
+                                   Text="" 
+                                   FontSize="13" 
+                                   FontWeight="Bold" 
+                                   Foreground="#333" 
+                                   HorizontalAlignment="Center"
+                                   Margin="0,8,0,0"
+                                   MinHeight="18"/>
+
+                        <TextBlock x:Name="EcoImpactText" 
+                                   Text="" 
+                                   FontSize="11" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#4CAF50" 
+                                   HorizontalAlignment="Center"
+                                   Margin="0,4,0,0"
+                                   MinHeight="16"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock x:Name="StatusText"
+                           Text="Checking system safety..."
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           Foreground="#D10056"
+                           Margin="0,15,0,0"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           MaxWidth="220"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Margin="15,0,15,20">
+                <TextBlock TextWrapping="Wrap" 
+                           TextAlignment="Center" 
+                           FontSize="11" 
+                           Foreground="#333">
+                    Made with ♥ during the GMU HackFax x PatriotHacks Hackathon 2026
+                </TextBlock>
+
+                <TextBlock HorizontalAlignment="Center" Margin="0,5,0,0">
+                    <Hyperlink NavigateUri="https://www.hackfaxpatriothacks.org/" 
+                               RequestNavigate="Hyperlink_RequestNavigate"
+                               Foreground="#D10056"
+                               TextDecorations="None">
+                        Visit Hackathon Site
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
