@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
@@ -18,7 +19,6 @@ namespace PatriotPower
         // Power Metrics
         private DispatcherTimer _powerPollTimer;
         private double _peakWattage = 0.0;
-        private double _preToggleWattage = 0.0; // The honest baseline for carbon offset
 
         // Registry Key for saving settings natively
         private const string RegKeyPath = @"Software\PatriotPower";
@@ -27,9 +27,9 @@ namespace PatriotPower
         {
             InitializeComponent();
 
-            // Initialize the metrics polling timer (1.5 seconds)
+            // Initialize the metrics polling timer (0.5 seconds)
             _powerPollTimer = new DispatcherTimer();
-            _powerPollTimer.Interval = TimeSpan.FromSeconds(1.5);
+            _powerPollTimer.Interval = TimeSpan.FromSeconds(0.5);
             _powerPollTimer.Tick += PowerPollTimer_Tick;
         }
 
@@ -66,16 +66,23 @@ namespace PatriotPower
                         // 2. Set the UI to match the hardware BEFORE attaching the events.
                         // This prevents the WPF toggle event from misfiring and modifying the system on startup.
                         EnduranceToggle.IsChecked = isEnduranceActive;
-                        EnduranceToggle.Content = isEnduranceActive ? "Endurance Mode: ON" : "Endurance Mode: OFF";
 
                         // 3. Attach event handlers now that the baseline state is firmly established
                         EnduranceToggle.Checked += EnduranceToggle_Checked;
                         EnduranceToggle.Unchecked += EnduranceToggle_Unchecked;
 
-                        StatusText.Text = isEnduranceActive
-                            ? "Endurance Mode Active ♥"
-                            : "♥ Hybrid System Detected ♥\nSafe to toggle.";
-                        StatusText.Foreground = new SolidColorBrush(Color.FromRgb(0, 100, 0)); // Dark Green
+                        if (isEnduranceActive)
+                        {
+                            StatusText.Text = string.Empty; // Clear existing text to use rich Inlines
+                            StatusText.Inlines.Add(new Run("Conserving energy, dGPU disabled ") { Foreground = new SolidColorBrush(Color.FromRgb(0, 100, 0)) });
+                            StatusText.Inlines.Add(new Run("♥") { Foreground = new SolidColorBrush(Color.FromRgb(255, 105, 180)) }); // Hot Pink
+                        }
+                        else
+                        {
+                            StatusText.Text = "Not power saving";
+                            StatusText.Foreground = new SolidColorBrush(Color.FromRgb(85, 85, 85)); // Dark Gray
+                        }
+
                         EnduranceToggle.IsEnabled = true;
                         _isSafetyCheckComplete = true;
                     }
@@ -113,81 +120,49 @@ namespace PatriotPower
             // Only update UI if the window is currently visible to save CPU cycles
             if (this.Visibility != Visibility.Visible) return;
 
-            if (PowerMonitor.IsPluggedIn())
-            {
-                CurrentDrawText.Text = "AC Power";
-                CurrentDrawText.Foreground = new SolidColorBrush(Color.FromRgb(100, 100, 100)); // Gray
-                PeakDrawText.Text = "Unplug to view metrics";
-                TimeRemainingText.Text = "";
-                EcoImpactText.Text = "";
-            }
-            else
-            {
-                var metrics = PowerMonitor.GetPowerMetrics();
+            // Step 1: Always check the raw metrics first to catch hybrid power drain
+            var metrics = PowerMonitor.GetPowerMetrics();
 
-                if (metrics.Watts > 0)
+            if (metrics.Watts > 0)
+            {
+                // The battery is actively losing charge (either on battery, or hybrid draining on AC)
+                CurrentDrawText.Text = $"{metrics.Watts:F1} W";
+                CurrentDrawText.Foreground = new SolidColorBrush(Color.FromRgb(51, 51, 51)); // Dark Text
+
+                // Track the absolute peak wattage as a session high-score only
+                if (metrics.Watts > _peakWattage)
                 {
-                    CurrentDrawText.Text = $"{metrics.Watts:F1} W";
-                    CurrentDrawText.Foreground = new SolidColorBrush(Color.FromRgb(51, 51, 51)); // Dark Text
+                    _peakWattage = metrics.Watts;
+                }
+                PeakDrawText.Text = $"Peak: {_peakWattage:F1} W";
 
-                    // Track the absolute peak wattage as a session high-score only
-                    if (metrics.Watts > _peakWattage)
-                    {
-                        _peakWattage = metrics.Watts;
-                    }
-                    PeakDrawText.Text = $"Peak: {_peakWattage:F1} W";
-
-                    // Display truthful Estimated Battery Life
-                    if (metrics.TimeRemaining.HasValue)
-                    {
-                        int hours = (int)metrics.TimeRemaining.Value.TotalHours;
-                        int minutes = metrics.TimeRemaining.Value.Minutes;
-                        TimeRemainingText.Text = $"Est. Battery: {hours}h {minutes}m";
-                    }
-                    else
-                    {
-                        TimeRemainingText.Text = "Calculating time...";
-                    }
-
-                    // --- Understandable Sustainability Metric ---
-                    if (EnduranceToggle.IsChecked == true && _preToggleWattage > metrics.Watts)
-                    {
-                        double conservedWatts = _preToggleWattage - metrics.Watts;
-
-                        if (conservedWatts >= 5.0)
-                        {
-                            // A standard household LED lightbulb draws roughly 10 Watts.
-                            // Power (Watts) is a live rate, meaning saving 30 Watts is 
-                            // actively saving enough power to light 3 rooms right now.
-                            int ledBulbs = (int)(conservedWatts / 10.0);
-
-                            if (ledBulbs >= 1)
-                            {
-                                EcoImpactText.Text = $"Saving enough power for {ledBulbs} LED bulbs 💡";
-                            }
-                            else
-                            {
-                                // Fallback: A modern smartphone charges at ~15 Watts.
-                                EcoImpactText.Text = $"Saving enough power to charge a phone 📱";
-                            }
-                        }
-                        else
-                        {
-                            EcoImpactText.Text = "";
-                        }
-                    }
-                    else
-                    {
-                        EcoImpactText.Text = "";
-                    }
+                // Display truthful Estimated Battery Life
+                if (metrics.TimeRemaining.HasValue)
+                {
+                    int hours = (int)metrics.TimeRemaining.Value.TotalHours;
+                    int minutes = metrics.TimeRemaining.Value.Minutes;
+                    TimeRemainingText.Text = $"Battery Remaining: {hours}h {minutes}m";
                 }
                 else
                 {
-                    CurrentDrawText.Text = "Reading...";
-                    CurrentDrawText.Foreground = new SolidColorBrush(Color.FromRgb(150, 150, 150)); // Light Gray
-                    TimeRemainingText.Text = "";
-                    EcoImpactText.Text = "";
+                    TimeRemainingText.Text = "Calculating time...";
                 }
+            }
+            // Step 2: If we are pulling 0 Watts from the battery, check if we are on AC power
+            else if (PowerMonitor.IsPluggedIn())
+            {
+                CurrentDrawText.Text = "AC Power";
+                CurrentDrawText.Foreground = new SolidColorBrush(Color.FromRgb(100, 100, 100)); // Gray
+                PeakDrawText.Text = "Battery is not discharging";
+                TimeRemainingText.Text = "";
+            }
+            // Step 3: Edge case where battery is present but not discharging, and not on AC (e.g., driver delay)
+            else
+            {
+                CurrentDrawText.Text = "Reading...";
+                CurrentDrawText.Foreground = new SolidColorBrush(Color.FromRgb(150, 150, 150)); // Light Gray
+                PeakDrawText.Text = "";
+                TimeRemainingText.Text = "";
             }
         }
 
@@ -221,7 +196,7 @@ namespace PatriotPower
             this.Show();
             this.Activate();
 
-            // Force a metrics update instantly upon opening instead of waiting 1.5s for the timer
+            // Force a metrics update instantly upon opening instead of waiting for the timer
             PowerPollTimer_Tick(null, EventArgs.Empty);
 
             var animationDuration = new Duration(TimeSpan.FromMilliseconds(500));
@@ -320,23 +295,15 @@ namespace PatriotPower
 
         private async void EnduranceToggle_Checked(object sender, RoutedEventArgs e)
         {
-            if (EnduranceToggle != null)
-            {
-                EnduranceToggle.Content = "Endurance Mode: ON";
-            }
-
-            // Honest snapshot: Capture the exact draw at the moment of intervention
-            if (!PowerMonitor.IsPluggedIn())
-            {
-                var metrics = PowerMonitor.GetPowerMetrics();
-                _preToggleWattage = metrics.Watts;
-            }
-
             StatusText.Text = "Switching to Endurance Mode...";
+            StatusText.Foreground = new SolidColorBrush(Color.FromRgb(0, 100, 0)); // Dark Green
             try
             {
                 await GpuManager.EnableEnduranceModeAsync();
-                StatusText.Text = "Endurance Mode Active ♥";
+
+                StatusText.Text = string.Empty; // Clear existing text to use rich Inlines
+                StatusText.Inlines.Add(new Run("Conserving energy, dGPU disabled ") { Foreground = new SolidColorBrush(Color.FromRgb(0, 100, 0)) });
+                StatusText.Inlines.Add(new Run("♥") { Foreground = new SolidColorBrush(Color.FromRgb(255, 105, 180)) }); // Hot Pink
             }
             catch (Exception ex)
             {
@@ -351,19 +318,12 @@ namespace PatriotPower
 
         private async void EnduranceToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (EnduranceToggle != null)
-            {
-                EnduranceToggle.Content = "Endurance Mode: OFF";
-            }
-
-            // Clear the baseline when mode is off so we stop claiming credit
-            _preToggleWattage = 0.0;
-
             StatusText.Text = "Waking up High-Performance GPU...";
+            StatusText.Foreground = new SolidColorBrush(Color.FromRgb(85, 85, 85)); // Dark Gray
             try
             {
                 await GpuManager.DisableEnduranceModeAsync();
-                StatusText.Text = "High-Performance Mode Active";
+                StatusText.Text = "Not power saving";
             }
             catch (Exception ex)
             {

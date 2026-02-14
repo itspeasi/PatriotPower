@@ -49,102 +49,110 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" 
-                        Orientation="Horizontal" 
-                        HorizontalAlignment="Right" 
-                        VerticalAlignment="Top" 
-                        Margin="0,15,15,0">
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                <ToggleButton x:Name="PinButton"
-                              Click="PinButton_Click"
-                              Background="Transparent" 
-                              BorderThickness="0" 
-                              Foreground="#888" 
-                              FontSize="14" 
-                              Margin="0,0,5,0"
-                              Padding="5"
-                              Cursor="Hand"
-                              ToolTip="Pin Window">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Content" Value="📍" />
-                            <Setter Property="Opacity" Value="0.6" />
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Content" Value="📌" />
-                                    <Setter Property="Opacity" Value="1.0" />
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Opacity" Value="1.0" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
+                <StackPanel Grid.Column="0" 
+                            HorizontalAlignment="Left" 
+                            VerticalAlignment="Top" 
+                            Margin="15,15,0,0">
+                    <TextBlock Text="♥ PatriotPower ♥" 
+                               FontWeight="Bold" 
+                               FontSize="20" 
+                               Foreground="#D10056"
+                               HorizontalAlignment="Left"/>
+                    <TextBlock Text="Control dGPU to conserve battery" 
+                               FontSize="11" 
+                               Foreground="#555"
+                               HorizontalAlignment="Left"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
 
-                <Button Content="✕" 
-                        Click="ExitButton_Click" 
-                        Background="Transparent" 
-                        BorderThickness="0" 
-                        Foreground="#888" 
-                        FontSize="16" 
-                        FontWeight="Bold"
-                        Padding="5"
-                        Cursor="Hand"
-                        ToolTip="Exit PatriotPower"/>
-            </StackPanel>
+                <StackPanel Grid.Column="1" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Right" 
+                            VerticalAlignment="Top" 
+                            Margin="0,15,15,0">
 
-            <StackPanel Grid.Row="0" Margin="0,25,0,0" HorizontalAlignment="Center">
-                <TextBlock Text="♥ PatriotPower ♥" 
-                           FontWeight="Bold" 
-                           FontSize="20" 
-                           Foreground="#D10056"
-                           HorizontalAlignment="Center"/>
-                <TextBlock Text="Hardware Kill-Switch" 
-                           FontSize="12" 
-                           Foreground="#555"
-                           HorizontalAlignment="Center"/>
-            </StackPanel>
+                    <ToggleButton x:Name="PinButton"
+                                  Click="PinButton_Click"
+                                  Background="Transparent" 
+                                  BorderThickness="0" 
+                                  Foreground="#888" 
+                                  FontSize="14" 
+                                  Margin="0,0,5,0"
+                                  Padding="5"
+                                  Cursor="Hand"
+                                  ToolTip="Pin Window">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="Content" Value="📍" />
+                                <Setter Property="Opacity" Value="0.6" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Content" Value="📌" />
+                                        <Setter Property="Opacity" Value="1.0" />
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="1.0" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+
+                    <Button Content="✕" 
+                            Click="ExitButton_Click" 
+                            Background="Transparent" 
+                            BorderThickness="0" 
+                            Foreground="#888" 
+                            FontSize="16" 
+                            FontWeight="Bold"
+                            Padding="5"
+                            Cursor="Hand"
+                            ToolTip="Exit PatriotPower"/>
+                </StackPanel>
+            </Grid>
 
             <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch">
 
-                <ui:ToggleSwitch x:Name="EnduranceToggle"
-                                 Content="Endurance Mode: OFF"
-                                 FontSize="16"
-                                 FontWeight="SemiBold"
-                                 Foreground="#8B0000"
-                                 Background="#F0F0F0"
-                                 BorderBrush="#555555"
-                                 BorderThickness="1.5"
-                                 HorizontalAlignment="Center"
-                                 RenderTransformOrigin="0.5,0.5"
-                                 Margin="0,5,0,5">
-                    <ui:ToggleSwitch.RenderTransform>
-                        <ScaleTransform ScaleX="1.5" ScaleY="1.5"/>
-                    </ui:ToggleSwitch.RenderTransform>
-                    <ui:ToggleSwitch.Resources>
-                        <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="#4CAF50" />
-                        <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver" Color="#45A049" />
-                        <SolidColorBrush x:Key="ToggleSwitchFillOnPressed" Color="#388E3C" />
-
-                        <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="White" />
-                        <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="White" />
-                        <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#E0E0E0" />
-
-                        <SolidColorBrush x:Key="ToggleSwitchStrokeOn" Color="#555555" />
-                        <SolidColorBrush x:Key="ToggleSwitchStrokeOff" Color="#555555" />
-                        <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver" Color="#555555" />
-                        <SolidColorBrush x:Key="ToggleSwitchStrokeOffPointerOver" Color="#555555" />
-                        <SolidColorBrush x:Key="ToggleSwitchStrokeOnPressed" Color="#555555" />
-                        <SolidColorBrush x:Key="ToggleSwitchStrokeOffPressed" Color="#555555" />
-                    </ui:ToggleSwitch.Resources>
-                </ui:ToggleSwitch>
-
-                <TextBlock Text="(Disables dGPU)" 
-                           FontSize="11" 
-                           Foreground="#888" 
-                           Margin="0,5,0,0" 
-                           HorizontalAlignment="Center"/>
+                <ToggleButton x:Name="EnduranceToggle"
+                              HorizontalAlignment="Center"
+                              Margin="0,5,0,20"
+                              Width="70" Height="70"
+                              Cursor="Hand">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="Border" 
+                                    CornerRadius="35" 
+                                    Background="#F0F0F0" 
+                                    BorderBrush="#888888" 
+                                    BorderThickness="2">
+                                <TextBlock x:Name="Icon"
+                                           Text="&#xE7E8;" 
+                                           FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" 
+                                           FontSize="30" 
+                                           HorizontalAlignment="Center" 
+                                           VerticalAlignment="Center" 
+                                           Foreground="#888888"
+                                           Margin="0,-2,0,0"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="#4CAF50"/>
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="#4CAF50"/>
+                                    <Setter TargetName="Icon" Property="Foreground" Value="White"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border" Property="Opacity" Value="0.8"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
 
                 <Border Background="#E5FFFFFF" CornerRadius="10" Margin="30,15,30,0" Padding="15,10">
                     <StackPanel>
@@ -177,15 +185,6 @@
                                    HorizontalAlignment="Center"
                                    Margin="0,8,0,0"
                                    MinHeight="18"/>
-
-                        <TextBlock x:Name="EcoImpactText" 
-                                   Text="" 
-                                   FontSize="11" 
-                                   FontWeight="SemiBold" 
-                                   Foreground="#4CAF50" 
-                                   HorizontalAlignment="Center"
-                                   Margin="0,4,0,0"
-                                   MinHeight="16"/>
                     </StackPanel>
                 </Border>
 
@@ -206,15 +205,12 @@
                            TextAlignment="Center" 
                            FontSize="11" 
                            Foreground="#333">
-                    Made with ♥ during the GMU HackFax x PatriotHacks Hackathon 2026
-                </TextBlock>
-
-                <TextBlock HorizontalAlignment="Center" Margin="0,5,0,0">
+                    Made with ♥ during the 
                     <Hyperlink NavigateUri="https://www.hackfaxpatriothacks.org/" 
                                RequestNavigate="Hyperlink_RequestNavigate"
                                Foreground="#D10056"
                                TextDecorations="None">
-                        Visit Hackathon Site
+                        GMU Hackathon 2026
                     </Hyperlink>
                 </TextBlock>
             </StackPanel>
